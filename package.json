@@ -1,0 +1,33 @@
+{
+  "name": "rest_response_helper",
+  "version": "1.0.0",
+  "description": "A response helper that implements HATEOAS.",
+  "main": "index.js",
+  "scripts": {
+    "test": "nodemon --exec 'jest --runInBand'"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/littlezigy/rest-response-helper.git"
+  },
+  "keywords": [
+    "rest",
+    "hateoas",
+    "express"
+  ],
+  "author": "Adesuwa Dawodu",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/littlezigy/rest-response-helper/issues"
+  },
+  "homepage": "https://github.com/littlezigy/rest-response-helper#readme",
+  "dependencies": {
+    "@littlezigy/responsehelper": "^1.1.1",
+    "body-parser": "^1.19.0",
+    "save-dev": "0.0.1-security",
+    "supertest": "^4.0.2"
+  },
+  "devDependencies": {
+    "express": "^4.17.1"
+  }
+}
