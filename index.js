@@ -17,8 +17,8 @@ module.exports = (req, res, next) => {
         let data = (typeof arguments[0] === 'object' || typeof arguments[0] === 'array') ? arguments[0] : null;
         let statusCode = arguments[1] || 400;
 
-        res.status(statusCode).send({error: message, ...data && {data}});
-        return reshelper().res.success();
+        let _links = (Object.keys(links).length > 0) ? links : null;
+        res.status(statusCode).send({ error: message, ...data && {data}, ..._links && {_links} });
     }
 
     /**
