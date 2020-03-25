@@ -5,7 +5,7 @@ console.log('\n--------------\nREQUIRED');
 console.log("NPM PACKAGE.JSON", process.env.npm_package_version);
 console.log('NPM CONFIG ROOT\n-----------------', process.env.npm_config_root);
 */
-let baseUrl = process.env.npm_package_littlezigy-rest;
+//let baseUrl = process.env.npm_package_littlezigy-rest;
 
 module.exports = (req, res, next) => {
 
