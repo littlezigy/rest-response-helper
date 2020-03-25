@@ -7,7 +7,6 @@ module.exports = (req, res, next) => {
                                    ...arguments[2] && {meta: {method: arguments[2].toUpperCase()} },
                                    ...arguments[3] && {schema: arguments[3]}
                                };
-        console.log('LINKS', links);
     }
 
     /**
