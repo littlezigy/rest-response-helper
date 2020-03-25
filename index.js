@@ -4,7 +4,8 @@ module.exports = (req, res, next) => {
     res.link = function() {
         links[arguments[0]] = {
                                    href: arguments[1], 
-                                   ...arguments[2] && {meta: {method: arguments[2].toUpperCase()} }
+                                   ...arguments[2] && {meta: {method: arguments[2].toUpperCase()} },
+                                   ...arguments[3] && {schema: arguments[3]}
                                };
         console.log('LINKS', links);
     }
