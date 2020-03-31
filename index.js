@@ -1,4 +1,6 @@
 let links = {};
+let baseurl = '';
+let schema = null;
 
 /*
 console.log("NPM PACKAGE.JSON", process.env.npm_package_version);
@@ -7,12 +9,26 @@ let baseUrl = process.env.npm_package_littlezigy-rest;
 */
 
 module.exports = (req, res, next) => {
+        
+    res.config = function(configObj) {
+        console.log("Running new config command with", configObj);
+        if(typeof configObj === 'object') {
+            baseurl = (configObj.baseurl) ? configObj.baseurl : (configObj.URL) ? configObj.URL : (configObj.baseURL) ? configObj.baseURL : '';
+        } else if(typeof configObj === 'string') {
+            baseurl = configObj;
+        }
+        console.log('changed console object', baseurl);
+    }
     res.link = function() {
         links[arguments[0]] = {
-           href: arguments[1], 
+           href: `${baseurl}${arguments[1]}`, 
            ...arguments[2] && {meta: {method: arguments[2].toUpperCase()} },
            ...arguments[3] && {schema: arguments[3]}
         };
+    }
+
+    res.schema = function() {
+        schema = data;
     }
 
     /**
@@ -52,7 +68,7 @@ module.exports = (req, res, next) => {
         let data = (typeof arguments[0] === 'object' || typeof arguments[0] === 'array') ? arguments[0] : 
                    (typeof arguments[1] === 'object' || typeof arguments[0] === 'array') ? arguments[1] : null;
         let _links = (Object.keys(links).length > 0) ? links : null;
-		res.send({success: message, ...data && {data}, ..._links && {_links}});
+		res.send({success: message, ...schema && {schema}, ...data && {data}, ..._links && {_links}});
         links = {};
     }
 

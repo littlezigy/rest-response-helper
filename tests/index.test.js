@@ -18,6 +18,15 @@
         return res.success(req.body);
     });
 
+    app.post('/config', function(req, res) {
+        console.info("Config");
+        res.config(req.body.config);
+        res.link('view_more', '/route1');
+        res.link('self', '/route1', 'post');
+        res.link('add_new', '/route/2');
+        return res.success(req.body);
+    });
+
 	app.post('/success', function(req, res) {
 		return res.success(req.body);
 	});
@@ -122,6 +131,16 @@
         test('Error: Status code 413', async function() {
             let foo = await request(app).post('/error/status').send({status: 413});
             expect(foo.status).toEqual(413);
+        });
+
+        test('Config string', async function() {
+            let configObj = 'http://localhost:3000';
+            let foo = await request(app).post('/config').send({config: configObj});
+            console.log('FOO', foo.body);
+            console.log('FOO', foo.body._links);
+            expect(foo.body._links).toHaveProperty('view_more', expect.stringContaining(configObj));
+            expect(foo.body._links).toHaveProperty('add_new',expect.stringContaining(configObj));
+            expect(foo.body._links).toHaveProperty('self', expect.stringContaining(configObj));
         });
 
         test('Error Object with code and title', async function() {
