@@ -8,17 +8,18 @@ console.log('NPM CONFIG ROOT\n-----------------', process.env.npm_config_root);
 let baseUrl = process.env.npm_package_littlezigy-rest;
 */
 
-module.exports = (req, res, next) => {
-        
-    res.config = function(configObj) {
-        console.log("Running new config command with", configObj);
-        if(typeof configObj === 'object') {
-            baseurl = (configObj.baseurl) ? configObj.baseurl : (configObj.URL) ? configObj.URL : (configObj.baseURL) ? configObj.baseURL : '';
-        } else if(typeof configObj === 'string') {
-            baseurl = configObj;
-        }
-        console.log('changed console object', baseurl);
+config = function(configObj) {
+    console.log("Running new config command with", configObj);
+    if(typeof configObj === 'object') {
+        baseurl = (configObj.baseurl) ? configObj.baseurl : (configObj.URL) ? configObj.URL : (configObj.baseURL) ? configObj.baseURL : '';
+    } else if(typeof configObj === 'string') {
+        baseurl = configObj;
     }
+    console.info('All links will now be prefixed with', baseurl);
+}
+
+functions = (req, res, next) => {
+        
     res.link = function() {
         links[arguments[0]] = {
            href: `${baseurl}${arguments[1]}`, 
@@ -27,7 +28,7 @@ module.exports = (req, res, next) => {
         };
     }
 
-    res.schema = function() {
+    res.schema = function(data) {
         schema = data;
     }
 
@@ -82,3 +83,5 @@ module.exports = (req, res, next) => {
     }
     next();
 }
+
+module.exports = { functions, config }

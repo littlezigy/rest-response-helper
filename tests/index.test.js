@@ -8,19 +8,16 @@
 	const app = express();
 	app.use(bodyparser.text())
 	app.use(bodyparser.json());
-	app.use(responsehelper);
+	app.use(responsehelper.functions);
 
     app.post('/success/links', function(req, res) {
-        console.info("This routes uses res.link multiple times. This is not the same as Express' res.links");
-        //res.link('/route1');
         res.link('self', '/route1', 'post');
         res.link('add_new', '/route/2');
         return res.success(req.body);
     });
 
+    responsehelper.config('http://localhost:3000');
     app.post('/config', function(req, res) {
-        console.info("Config");
-        res.config(req.body.config);
         res.link('view_more', '/route1');
         res.link('self', '/route1', 'post');
         res.link('add_new', '/route/2');
@@ -28,11 +25,11 @@
     });
 
 	app.post('/success', function(req, res) {
+        if(req.body.schema) res.schema(req.body.schema);
 		return res.success(req.body);
 	});
 
     app.post('/error/one/parameter', function(req, res) {
-        console.log("sends error string");
         return res.gerror(req.body.error);
 	});
 
@@ -45,11 +42,9 @@
     });
 
     app.post('/error/object', function(req, res) {
-        console.log('sends error object');
         return res.gerror(req.body); 
     });
-    app.post('/error/status', function(req, res) {
-        console.log('Sets status code');
+    app.post('/error/status', function(req, res) {//Sets custom status code
         res.status(req.body.status);
         return res.gerror({code: 'test_error', title: 'Blah Blah'}); 
     });
@@ -136,12 +131,18 @@
         test('Config string', async function() {
             let configObj = 'http://localhost:3000';
             let foo = await request(app).post('/config').send({config: configObj});
-            console.log('FOO', foo.body);
-            console.log('FOO', foo.body._links);
-            expect(foo.body._links).toHaveProperty('view_more', expect.stringContaining(configObj));
-            expect(foo.body._links).toHaveProperty('add_new',expect.stringContaining(configObj));
-            expect(foo.body._links).toHaveProperty('self', expect.stringContaining(configObj));
+            expect(foo.body._links.view_more).toHaveProperty('href', expect.stringContaining(configObj));
+            expect(foo.body._links.add_new).toHaveProperty('href',expect.stringContaining(configObj));
+            expect(foo.body._links.self).toHaveProperty('href', expect.stringContaining(configObj));
         });
+
+		test('Schema', async function() {
+			let payload = {schema: {properties: {name: 'Poo'} } };
+			let foo = await request(app)
+					.post('/success').send(payload);
+
+            expect(foo.body).toHaveProperty('schema', payload.schema);
+		});
 
         test('Error Object with code and title', async function() {
             let foo = await request(app).post('/error/object').send({code: 'blah_blah', title: 'Professional Blah'});
