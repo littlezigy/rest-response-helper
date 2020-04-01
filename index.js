@@ -58,6 +58,7 @@ functions = (req, res, next) => {
 
         res.send({error: {...code &&  {code}, ...title && {title}, ...detail && {detail}, ..._links && {_links} }});
         links = {};
+        schema = null;
     }
 
     /**
@@ -71,6 +72,7 @@ functions = (req, res, next) => {
         let _links = (Object.keys(links).length > 0) ? links : null;
 		res.send({success: message, ...schema && {schema}, ...data && {data}, ..._links && {_links}});
         links = {};
+        schema = null;
     }
 
     res.failure = () => {
@@ -80,6 +82,7 @@ functions = (req, res, next) => {
 
         res.status(statusCode).send({fail: message, ...data && {data}});
         links = {};
+        schema = null;
     }
     next();
 }
