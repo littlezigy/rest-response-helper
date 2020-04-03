@@ -15,6 +15,13 @@
         res.link('add_new', '/route/2');
         return res.success(req.body);
     });
+    app.post('/success/links/inner', function(req, res) {
+        for(let post in req.body) {
+            /*if(Array.isArray(post))*/ res.innerLink(req.body[post], '/example/worked');
+            //else res.innerLink({post: req.body[post]});
+        }
+        return res.success(req.body);
+    });
 
     responsehelper.config('http://localhost:3000');
     app.post('/config', function(req, res) {
@@ -71,6 +78,19 @@
         test('Using res.links multiple times', async function() {
 			let foo = await request(app).post("/success/links").send({fee: "fee", fi: "fi!", foh: 'foh!', fum: 'I smell the blood of an Englishman!'});
             expect(foo.body).toHaveProperty('_links');
+        });
+        test('res.innerlink with Object', async function() {
+            let foo = await request(app).post('/success/links/inner').send({fee:  {bwong: 'fee'}, fi: {bwong: 'fi!'}, foh: {bwong: 'foh!'}, fum: {bwong:'I smell the blood of an Inner _link'}});
+            expect(foo.body.data.fee).toHaveProperty('_links');
+            expect(foo.body.data.fee._links).toHaveProperty('href');
+            expect(foo.body.data.fi).toHaveProperty('_links');
+            expect(foo.body.data.fum).toHaveProperty('_links');
+            expect(foo.body.data.foh).toHaveProperty('_links');
+        });
+        test('res.innerlink with Array', async function() {
+            let foo = await request(app).post('/success/links/inner').send({fee: [{bwang:'fee', fi: 'fi!', foh: 'foh!', fum: 'I smell the blood of an Inner _link'}]});
+            expect(foo.body.data.fee[0]).toHaveProperty('_links');
+            expect(foo.body.data.fee[0]._links).toHaveProperty('href');
         });
 
 		test.skip('String and Object payload', async function() {

@@ -1,4 +1,5 @@
 let links = {};
+let innerLinks = {};
 let baseurl = '';
 let schema = null;
 
@@ -27,6 +28,21 @@ functions = (req, res, next) => {
            ...arguments[3] && {schema: arguments[3]}
         };
     }
+    res.innerLink = function(xxx, link, method = null, schema = null) {
+        let href = link;
+        let meta = (method!== null) ? {method} : null;
+
+        if(Array.isArray(xxx)) {
+            xxx.forEach(element => {
+                if(!element._links) {
+                    element._links = {};
+                }
+                element._links = { href: link, ...meta && {meta}, ...schema && {schema} };
+            });
+        } else if(typeof xxx === 'object' && xxx !== null) {
+            xxx._links = { href: link, ...meta && {meta}, ...schema && {schema} };
+        }
+    },
 
     res.schema = function(data) {
         schema = data;
