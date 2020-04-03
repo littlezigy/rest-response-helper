@@ -28,7 +28,7 @@ functions = (req, res, next) => {
            ...arguments[3] && {schema: arguments[3]}
         };
     }
-    res.innerLink = function(xxx, link, method = null, schema = null) {
+    res.innerLink = function(xxx, name, link, method = null) {
         let href = link;
         let meta = (method!== null) ? {method} : null;
 
@@ -37,10 +37,13 @@ functions = (req, res, next) => {
                 if(!element._links) {
                     element._links = {};
                 }
-                element._links = { href: link, ...meta && {meta}, ...schema && {schema} };
+                element._links[name] = { href: link, ...meta && {meta}, ...schema && {schema} };
             });
         } else if(typeof xxx === 'object' && xxx !== null) {
-            xxx._links = { href: link, ...meta && {meta}, ...schema && {schema} };
+                if(!xxx._links) {
+                    xxx._links = {};
+                }
+            xxx._links[name] = { href: link, ...meta && {meta}, ...schema && {schema} };
         }
     },
 
