@@ -37,7 +37,21 @@ functions = (req, res, next) => {
                 if(!element._links) {
                     element._links = {};
                 }
-                element._links[name] = { href: link, ...meta && {meta}, ...schema && {schema} };
+                if(typeof link === 'object' && link !== null) {
+                    console.log('------------------------------------\nLINK HREF FORM HOME', link);
+                    let templateVars = link.href.match(/(?<=\/:)[^\/]*/g);
+                    console.log('TEMPLATE VAR', templateVars);
+                    Object.keys(link).forEach(template => {
+                        if(templateVars.includes(template)) {
+                            console.log('VAR!');
+                            link.href = link.href.split(":" + template).join(link[template]);
+                            console.log(link.href);
+                        }
+                        console.log('LINK HREF', link.href);
+                    });
+                    console.log('LINK', link);
+                     element._links[name] = { href: link.href, ...meta && {meta}, ...schema && {schema} };
+                } else element._links[name] = { href: link, ...meta && {meta}, ...schema && {schema} };
             });
         } else if(typeof xxx === 'object' && xxx !== null) {
                 if(!xxx._links) {
