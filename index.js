@@ -24,6 +24,7 @@ hrefLink = function(link, element) {
         let templateVars = link.href.match(/(?<=\/:)[^\/]*/g);
 
         Object.keys(link).forEach(template => {
+            console.log('TEMPLATE FOLLOWED BY LINK', template, link);
             if(templateVars.includes(template)) {
                 console.log(link[template]);
                 if(link[template] !== null && typeof link[template] === 'object') {
