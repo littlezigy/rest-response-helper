@@ -99,9 +99,11 @@
         
         test('Inner linking with Object', async function() {
             let foo = await request(app).post('/success/links/inner').send({fee:  {bwong: 'fee'}, fi: {bwong: 'fi!'}, foh: {bwong: 'foh!'} });
+            console.log('FOO OBJ LINKS', foo.body.data.fee);
             expect(foo.body.data.fee).toHaveProperty('_links');
             expect(foo.body.data.fee._links.previous).toHaveProperty('href');
             expect(foo.body.data.fee._links).toHaveProperty('self');
+            expect(foo.body.data.fee._links.self).toHaveProperty('href', 'http://localhost:3000/example/self');
 
             expect(foo.body.data.fi).toHaveProperty('_links');
             expect(foo.body.data.fi._links).toHaveProperty('self');
@@ -111,7 +113,7 @@
             let foo = await request(app).post('/success/links/inner/templated/1382').send({fee:  {bwong: 'fee'}, fi: {bwong: 'fi!'}, foh: {bwong: 'foh!'} });
             console.log(foo.body.data);
             expect(foo.body.data.fee).toHaveProperty('_links');
-            expect(foo.body.data.fee._links.self).toHaveProperty('href', '/example/1382');
+            expect(foo.body.data.fee._links.self).toHaveProperty('href', 'http://localhost:3000/example/1382');
 
             expect(foo.body.data.fi).toHaveProperty('_links');
             expect(foo.body.data.fi._links).toHaveProperty('self');
@@ -121,13 +123,15 @@
             let foo = await request(app).post('/success/links/inner/obj').send({fee:  {bwong: 'fee', foo: '1001'} });
             console.log(foo.body.data);
             expect(foo.body.data.fee).toHaveProperty('_links');
-            expect(foo.body.data.fee._links.self).toHaveProperty('href', '/example/1001');
+            expect(foo.body.data.fee._links.self).toHaveProperty('href', 'http://localhost:3000/example/1001');
         });
         test('Inner Linking with an Array', async function() {
             let foo = await request(app).post('/success/links/inner').send({fee: [{bwang:'fee', fi: 'fi!', foh: 'foh!', fum: 'I smell the blood of an Inner _link'}]});
             expect(foo.body.data.fee[0]).toHaveProperty('_links');
             expect(foo.body.data.fee[0]._links).toHaveProperty('self');
+            expect(foo.body.data.fee[0]._links.self).toHaveProperty('href', 'http://localhost:3000/example/self');
             expect(foo.body.data.fee[0]._links).toHaveProperty('next');
+            expect(foo.body.data.fee[0]._links.next).toHaveProperty('href', 'http://localhost:3000/example/worked');
         });
 
         test('Templated Inner Linking with an Array', async function() {
@@ -135,18 +139,17 @@
             let foo = await request(app).post(`/success/links/inner/templated/${number}`).send({fee: [{foo: 777, bwang:'fee', fi: 'fi!', twelve: 12, foh: 'foh!', fum: 'I smell the blood of an Inner _link'}]});
             expect(foo.body.data.fee[0]).toHaveProperty('_links');
 
-            expect(foo.body.data.fee[0]._links.self).toHaveProperty('href', `/example/${number}`);
-            expect(foo.body.data.fee[0]._links.next).toHaveProperty('href', `/example/${ number }/instance/12`);
+            expect(foo.body.data.fee[0]._links.self).toHaveProperty('href', `http://localhost:3000/example/${number}`);
+            expect(foo.body.data.fee[0]._links.next).toHaveProperty('href', `http://localhost:3000/example/${ number }/instance/12`);
         });
 
         test('Templated Inner Linking with an Array [object Property]', async function() {
             let number = 1382;
             let foo = await request(app).post('/success/links/inner/obj').send({fee: [{foo: 777, bwang:'fee'}, {foo: 12, fi: 'fi!'}, {foo: 100, twelve: 12, fum: 'I smell the blood of an Inner _link'}]});
             console.log(foo.headers);
-            expect(foo.status).toEqual(200);
             expect(foo.body.data.fee[0]).toHaveProperty('_links');
             expect(foo.body.data.fee[0]._links).toHaveProperty('self');
-            expect(foo.body.data.fee[0]._links.self).toHaveProperty('href', '/example/777');
+            expect(foo.body.data.fee[0]._links.self).toHaveProperty('href', 'http://localhost:3000/example/777');
         });
 
 		test.skip('String and Object payload', async function() {

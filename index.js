@@ -3,12 +3,6 @@ let innerLinks = {};
 let baseurl = '';
 let schema = null;
 
-/*
-console.log("NPM PACKAGE.JSON", process.env.npm_package_version);
-console.log('NPM CONFIG ROOT\n-----------------', process.env.npm_config_root);
-let baseUrl = process.env.npm_package_littlezigy-rest;
-*/
-
 config = function(configObj) {
     if(typeof configObj === 'object') {
         baseurl = (configObj.baseurl) ? configObj.baseurl : (configObj.URL) ? configObj.URL : (configObj.baseURL) ? configObj.baseURL : '';
@@ -21,20 +15,15 @@ hrefLink = function(link, element) {
 //link = {href, ...}
     if(typeof linkObj !== 'string') link = JSON.parse(JSON.stringify(link)); //For immutable Object
 
-    console.log('LINK ---------------->', link);
     if(typeof link === 'object' && link !== null) {
         console.log('------------------------------------\nLINK HREF FORM HOME', link);
         let templateVars = link.href.match(/(?<=\/:)[^\/]*/g);
 
         Object.keys(link).forEach(template => {
-            console.log('TEMPLATE FOLLOWED BY LINK', template, link);
-            console.log('TEMPLATE VARS', templateVars);
             if(templateVars.includes(template)) {
                 console.log(link[template]);
                 if(link[template] !== null && typeof link[template] === 'object') {
                     let property = link[template].property;
-                    console.log('PROPERTY IS IN LINK', property);
-                    console.log('DOES PROPERTY HAVE LINK IN IT?', element);
                     if(element.hasOwnProperty(property)) {
                         link.href = link.href.split(":" + template).join(element[property]);
                     } else console.log('PROEPRTY DOESN\'T EXIST'); // throw {error: "property not defined in link"}
@@ -43,8 +32,8 @@ hrefLink = function(link, element) {
                 //console.log(link.href);
             }
         });
-        return link.href;
-    } else return link;
+        return baseurl + link.href;
+    } else return baseurl + link;
 }
 
 functions = (req, res, next) => {
