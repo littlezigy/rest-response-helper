@@ -141,8 +141,9 @@
 
         test('Templated Inner Linking with an Array [object Property]', async function() {
             let number = 1382;
-            let foo = await request(app).post('/success/links/inner/obj').send({fee: [{foo: 777, bwang:'fee', fi: 'fi!', twelve: 12, fum: 'I smell the blood of an Inner _link'}]});
-            console.log(foo.body.data.fee[0]._links);
+            let foo = await request(app).post('/success/links/inner/obj').send({fee: [{foo: 777, bwang:'fee'}, {foo: 12, fi: 'fi!'}, {foo: 100, twelve: 12, fum: 'I smell the blood of an Inner _link'}]});
+            console.log(foo.headers);
+            expect(foo.status).toEqual(200);
             expect(foo.body.data.fee[0]).toHaveProperty('_links');
             expect(foo.body.data.fee[0]._links).toHaveProperty('self');
             expect(foo.body.data.fee[0]._links.self).toHaveProperty('href', '/example/777');

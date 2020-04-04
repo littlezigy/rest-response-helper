@@ -19,6 +19,9 @@ config = function(configObj) {
 }
 hrefLink = function(link, element) {
 //link = {href, ...}
+    if(typeof linkObj !== 'string') link = JSON.parse(JSON.stringify(link)); //For immutable Object
+
+    console.log('LINK ---------------->', link);
     if(typeof link === 'object' && link !== null) {
         console.log('------------------------------------\nLINK HREF FORM HOME', link);
         let templateVars = link.href.match(/(?<=\/:)[^\/]*/g);
@@ -54,6 +57,7 @@ functions = (req, res, next) => {
         };
     }
     res.innerLink = function(xxx, name, link, method = null) {
+        console.log('BWANG');
         let href;
 
         let meta = (method!== null) ? {method} : null;
