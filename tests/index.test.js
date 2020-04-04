@@ -25,11 +25,16 @@
         }
         return res.success(req.body);
     });
+    app.post('/success/links/inner/obj', function(req, res) {
+        for(let post in req.body) {
+            res.innerLink(req.body[post], 'self', {href: '/example/:id', id: {property: 'foo'} });
+        }
+        return res.success(req.body);
+    });
     app.post('/success/links/inner/templated/:id', function(req, res) {
         for(let post in req.body) {
-            res.innerLink(req.body[post], 'previous', {href: '/example/:id', id: req.params.id });
-            res.innerLink(req.body[post], 'next', {href: '/example/:id/instance/:instance', id: req.params.id, instance: 12});
             res.innerLink(req.body[post], 'self', {href: '/example/:id', id: req.params.id});
+            res.innerLink(req.body[post], 'next', {href: '/example/:id/instance/:instance', id: req.params.id, instance: 12});
             //else res.innerLink({post: req.body[post]});
         }
         return res.success(req.body);
@@ -95,14 +100,28 @@
         test('Inner linking with Object', async function() {
             let foo = await request(app).post('/success/links/inner').send({fee:  {bwong: 'fee'}, fi: {bwong: 'fi!'}, foh: {bwong: 'foh!'} });
             expect(foo.body.data.fee).toHaveProperty('_links');
-            expect(foo.body.data.fee._links).toHaveProperty('previous');
             expect(foo.body.data.fee._links.previous).toHaveProperty('href');
             expect(foo.body.data.fee._links).toHaveProperty('self');
 
             expect(foo.body.data.fi).toHaveProperty('_links');
-            expect(foo.body.data.fi._links.previous).toHaveProperty('href');
             expect(foo.body.data.fi._links).toHaveProperty('self');
 
+        });
+        test('Templated Inner linking with Object', async function() {
+            let foo = await request(app).post('/success/links/inner/templated/1382').send({fee:  {bwong: 'fee'}, fi: {bwong: 'fi!'}, foh: {bwong: 'foh!'} });
+            console.log(foo.body.data);
+            expect(foo.body.data.fee).toHaveProperty('_links');
+            expect(foo.body.data.fee._links.self).toHaveProperty('href', '/example/1382');
+
+            expect(foo.body.data.fi).toHaveProperty('_links');
+            expect(foo.body.data.fi._links).toHaveProperty('self');
+
+        });
+        test('Templated Inner linking with Object Property', async function() {
+            let foo = await request(app).post('/success/links/inner/obj').send({fee:  {bwong: 'fee', foo: '1001'} });
+            console.log(foo.body.data);
+            expect(foo.body.data.fee).toHaveProperty('_links');
+            expect(foo.body.data.fee._links.self).toHaveProperty('href', '/example/1001');
         });
         test('Inner Linking with an Array', async function() {
             let foo = await request(app).post('/success/links/inner').send({fee: [{bwang:'fee', fi: 'fi!', foh: 'foh!', fum: 'I smell the blood of an Inner _link'}]});
@@ -113,13 +132,20 @@
 
         test('Templated Inner Linking with an Array', async function() {
             let number = 1382;
-            let foo = await request(app).post(`/success/links/inner/templated/${number}`).send({fee: [{bwang:'fee', fi: 'fi!', twelve: 12, foh: 'foh!', fum: 'I smell the blood of an Inner _link'}]});
-            console.log('FOO.BODY', foo.body.data.fee[0]._links);
+            let foo = await request(app).post(`/success/links/inner/templated/${number}`).send({fee: [{foo: 777, bwang:'fee', fi: 'fi!', twelve: 12, foh: 'foh!', fum: 'I smell the blood of an Inner _link'}]});
             expect(foo.body.data.fee[0]).toHaveProperty('_links');
 
             expect(foo.body.data.fee[0]._links.self).toHaveProperty('href', `/example/${number}`);
-            expect(foo.body.data.fee[0]._links.previous).toHaveProperty('href', `/example/${ number }`);
             expect(foo.body.data.fee[0]._links.next).toHaveProperty('href', `/example/${ number }/instance/12`);
+        });
+
+        test('Templated Inner Linking with an Array [object Property]', async function() {
+            let number = 1382;
+            let foo = await request(app).post('/success/links/inner/obj').send({fee: [{foo: 777, bwang:'fee', fi: 'fi!', twelve: 12, fum: 'I smell the blood of an Inner _link'}]});
+            console.log(foo.body.data.fee[0]._links);
+            expect(foo.body.data.fee[0]).toHaveProperty('_links');
+            expect(foo.body.data.fee[0]._links).toHaveProperty('self');
+            expect(foo.body.data.fee[0]._links.self).toHaveProperty('href', '/example/777');
         });
 
 		test.skip('String and Object payload', async function() {

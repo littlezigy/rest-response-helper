@@ -10,13 +10,36 @@ let baseUrl = process.env.npm_package_littlezigy-rest;
 */
 
 config = function(configObj) {
-    console.log("Running new config command with", configObj);
     if(typeof configObj === 'object') {
         baseurl = (configObj.baseurl) ? configObj.baseurl : (configObj.URL) ? configObj.URL : (configObj.baseURL) ? configObj.baseURL : '';
     } else if(typeof configObj === 'string') {
         baseurl = configObj;
     }
     console.info('All links will now be prefixed with', baseurl);
+}
+hrefLink = function(link, element) {
+//link = {href, ...}
+    if(typeof link === 'object' && link !== null) {
+        console.log('------------------------------------\nLINK HREF FORM HOME', link);
+        let templateVars = link.href.match(/(?<=\/:)[^\/]*/g);
+
+        Object.keys(link).forEach(template => {
+            if(templateVars.includes(template)) {
+                console.log(link[template]);
+                if(link[template] !== null && typeof link[template] === 'object') {
+                    let property = link[template].property;
+                    console.log('PROPERTY IS IN LINK', property);
+                    console.log('DOES PROPERTY HAVE LINK IN IT?', element);
+                    if(element.hasOwnProperty(property)) {
+                        link.href = link.href.split(":" + template).join(element[property]);
+                    } else console.log('PROEPRTY DOESN\'T EXIST'); // throw {error: "property not defined in link"}
+
+                } else link.href = link.href.split(":" + template).join(link[template]);
+                //console.log(link.href);
+            }
+        });
+        return link.href;
+    } else return link;
 }
 
 functions = (req, res, next) => {
@@ -29,35 +52,25 @@ functions = (req, res, next) => {
         };
     }
     res.innerLink = function(xxx, name, link, method = null) {
-        let href = link;
+        let href;
+
         let meta = (method!== null) ? {method} : null;
 
         if(Array.isArray(xxx)) {
             xxx.forEach(element => {
+                href = hrefLink(link, element)
                 if(!element._links) {
                     element._links = {};
                 }
-                if(typeof link === 'object' && link !== null) {
-                    console.log('------------------------------------\nLINK HREF FORM HOME', link);
-                    let templateVars = link.href.match(/(?<=\/:)[^\/]*/g);
-                    console.log('TEMPLATE VAR', templateVars);
-                    Object.keys(link).forEach(template => {
-                        if(templateVars.includes(template)) {
-                            console.log('VAR!');
-                            link.href = link.href.split(":" + template).join(link[template]);
-                            console.log(link.href);
-                        }
-                        console.log('LINK HREF', link.href);
-                    });
-                    console.log('LINK', link);
-                     element._links[name] = { href: link.href, ...meta && {meta}, ...schema && {schema} };
-                } else element._links[name] = { href: link, ...meta && {meta}, ...schema && {schema} };
+
+                element._links[name] = { href, ...meta && {meta}, ...schema && {schema} };
             });
         } else if(typeof xxx === 'object' && xxx !== null) {
+                href = hrefLink(link, xxx)
                 if(!xxx._links) {
                     xxx._links = {};
                 }
-            xxx._links[name] = { href: link, ...meta && {meta}, ...schema && {schema} };
+            xxx._links[name] = { href, ...meta && {meta}, ...schema && {schema} };
         }
     },
 
