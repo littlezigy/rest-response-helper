@@ -25,6 +25,7 @@ hrefLink = function(link, element) {
 
         Object.keys(link).forEach(template => {
             console.log('TEMPLATE FOLLOWED BY LINK', template, link);
+            console.log('TEMPLATE VARS', templateVars);
             if(templateVars.includes(template)) {
                 console.log(link[template]);
                 if(link[template] !== null && typeof link[template] === 'object') {
