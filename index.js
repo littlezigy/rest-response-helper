@@ -16,12 +16,10 @@ hrefLink = function(link, element) {
     if(typeof linkObj !== 'string') link = JSON.parse(JSON.stringify(link)); //For immutable Object
 
     if(typeof link === 'object' && link !== null) {
-        console.log('------------------------------------\nLINK HREF FORM HOME', link);
         let templateVars = link.href.match(/(?<=\/:)[^\/]*/g);
 
         Object.keys(link).forEach(template => {
             if(templateVars.includes(template)) {
-                console.log(link[template]);
                 if(link[template] !== null && typeof link[template] === 'object') {
                     let property = link[template].property;
                     if(element.hasOwnProperty(property)) {
@@ -46,7 +44,6 @@ functions = (req, res, next) => {
         };
     }
     res.innerLink = function(xxx, name, link, method = null) {
-        console.log('BWANG');
         let href;
 
         let meta = (method!== null) ? {method} : null;
