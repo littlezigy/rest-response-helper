@@ -11,10 +11,12 @@ config = function(configObj) {
     }
     console.info('All links will now be prefixed with', baseurl);
 }
-hrefLink = function(link, element) {
-//link = {href, ...}
+hrefLink = function(link, element = null) {
+    //link = {href, ...}
     if(typeof linkObj !== 'string') link = JSON.parse(JSON.stringify(link)); //For immutable Object
 
+    //If link is an object, then it has a named object  = 'key' containing property 'property'. 'property' exists in the object(s) in element.
+    //Get value of 'property' from object(s) in element and replace string `:key` with the value in Object
     if(typeof link === 'object' && link !== null) {
         let templateVars = link.href.match(/(?<=\/:)[^\/]*/g);
 
@@ -34,11 +36,31 @@ hrefLink = function(link, element) {
     } else return baseurl + link;
 }
 
+templatedLink = function(linkObj) {
+    let templateVars = linkObj.href.match(/(?<=\/:)[^\/]*/g);
+    let newLink = linkObj.href
+    //For each object in link, except href
+    Object.keys(linkObj).forEach(linkVar => {
+        if(linkVar !== 'href') {
+            if(typeof linkObj[linkVar] === 'string' || typeof linkObj[linkVar] === 'number') {
+                newLink = newLink.split(":" + linkVar).join(linkObj[linkVar]);
+            }
+        }
+    });
+    return  newLink;
+}
+
 functions = (req, res, next) => {
         
-    res.link = function() {
-        links[arguments[0]] = {
-           href: `${baseurl}${arguments[1]}`, 
+    res.link = function(name, link, method = null) {
+        let href;
+        if(typeof link !== 'string' && typeof link === 'object' && link !== null) {
+            href = templatedLink(link);
+        }
+        else href = link;
+
+        links[name] = {
+           href: baseurl + href,
            ...arguments[2] && {meta: {method: arguments[2].toUpperCase()} },
            ...arguments[3] && {schema: arguments[3]}
         };
