@@ -91,9 +91,10 @@
 			let foo = await request(app).post("/success")
 						.send({fee: "fee", fi: "fi!", foh: 'foh!', fum: 'I smell the blood of an Englishman!'});
 
-			expect(foo.body).toHaveProperty('success');
-			expect(typeof foo.body.success).toEqual('string');
-			expect(foo.body).toHaveProperty('data');
+			expect(foo).toHaveProperty('body', {
+                success: expect.any(String),
+                data: {fee: 'fee', fi: 'fi!', foh: 'foh!', fum: 'I smell the blood of an Englishman!'}
+            });
 		});
 
 		test('res.success(string)', async function() {

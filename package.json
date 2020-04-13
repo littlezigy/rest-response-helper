@@ -22,12 +22,10 @@
   },
   "homepage": "https://github.com/littlezigy/rest-response-helper#readme",
   "dependencies": {
-    "@littlezigy/responsehelper": "^1.1.1",
-    "body-parser": "^1.19.0",
-    "save-dev": "0.0.1-security",
-    "supertest": "^4.0.2"
+    "@littlezigy/responsehelper": "^1.1.1"
   },
   "devDependencies": {
-    "express": "^4.17.1"
+    "express": "^4.17.1",
+    "supertest": "^4.0.2"
   }
 }

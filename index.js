@@ -3,7 +3,7 @@ let innerLinks = {};
 let baseurl = '';
 let schema = null;
 
-let _embedded = {};
+let embedded = {};
 
 config = function(configObj) {
     if(typeof configObj === 'object') {
@@ -94,7 +94,7 @@ functions = (req, res, next) => {
     res.embed = function(name, data, parent = null) {
         if((typeof data !== 'object' && data === null) && typeof data !== 'array') throw new Error('The second parameter should be an object.');
         if(parent === null) {
-            _embedded[name] = data;
+            embedded[name] = data;
         }
     }
         
@@ -141,8 +141,9 @@ functions = (req, res, next) => {
         let data = (typeof arguments[0] === 'object' || typeof arguments[0] === 'array') ? arguments[0] : 
                    (typeof arguments[1] === 'object' || typeof arguments[0] === 'array') ? arguments[1] : null;
         let _links = (Object.keys(links).length > 0) ? links : null;
+        let _embedded = (Object.keys(embedded).length > 0) ? embedded : null;
 		res.send({success: message, ...schema && {schema}, ...data && {data}, ..._embedded && {_embedded},  ..._links && {_links}});
-        _embedded = {};
+        embedded = {};
         links = {};
         schema = null;
     }
