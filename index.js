@@ -3,6 +3,8 @@ let innerLinks = {};
 let baseurl = '';
 let schema = null;
 
+let _embedded = {};
+
 config = function(configObj) {
     if(typeof configObj === 'object') {
         baseurl = (configObj.baseurl) ? configObj.baseurl : (configObj.URL) ? configObj.URL : (configObj.baseURL) ? configObj.baseURL : '';
@@ -26,7 +28,7 @@ hrefLink = function(link, element = null) {
                     let property = link[template].property;
                     if(element.hasOwnProperty(property)) {
                         link.href = link.href.split(":" + template).join(element[property]);
-                    } else console.log('PROEPRTY DOESN\'T EXIST'); // throw {error: "property not defined in link"}
+                    } else console.debug('PROEPRTY DOESN\'T EXIST'); // throw {error: "property not defined in link"}
 
                 } else link.href = link.href.split(":" + template).join(link[template]);
                 //console.log(link.href);
@@ -89,6 +91,14 @@ functions = (req, res, next) => {
         }
     },
 
+    res.embed = function(name, data, parent = null) {
+        if((typeof data !== 'object' && data === null) && typeof data !== 'array') throw new Error('The second parameter should be an object.');
+        if(parent === null) {
+            _embedded[name] = data;
+        }
+    }
+        
+
     res.schema = function(data) {
         schema = data;
     }
@@ -131,7 +141,8 @@ functions = (req, res, next) => {
         let data = (typeof arguments[0] === 'object' || typeof arguments[0] === 'array') ? arguments[0] : 
                    (typeof arguments[1] === 'object' || typeof arguments[0] === 'array') ? arguments[1] : null;
         let _links = (Object.keys(links).length > 0) ? links : null;
-		res.send({success: message, ...schema && {schema}, ...data && {data}, ..._links && {_links}});
+		res.send({success: message, ...schema && {schema}, ...data && {data}, ..._embedded && {_embedded},  ..._links && {_links}});
+        _embedded = {};
         links = {};
         schema = null;
     }

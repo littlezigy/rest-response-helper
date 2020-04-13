@@ -44,6 +44,14 @@
         }
         return res.success(req.body);
     });
+    app.post('/:responseType/embedded', function(req, res) {
+        for(let [key, value] of Object.entries(req.body)) {
+            res.embed(value.name, value.payload);
+        }
+        if(req.params.responseType == 'success') res.success();
+        else if(req.params.responseType == 'error') res.gerror();
+        else res.failure();
+    });
 
     responsehelper.config('http://localhost:3000');
     app.post('/config', function(req, res) {
@@ -96,10 +104,30 @@
 
 			expect(foo.body).toHaveProperty('success', payload);
 		});
+        test('Embedded Resource - Success', async function() {
+            await expect( request(app).post('/success/embedded').send(
+                {blart: {name: 'Beautiful Link', payload: {one: 1, two: 2}}, mall: {name: 'arryeah', payload: ['one', 'two', 1, 2]}}
+            )).resolves.toHaveProperty('body', { 
+                success: expect.any(String),
+                _embedded: {
+                    'Beautiful Link': { one: 1, two: 2 },
+                    arryeah: ['one', 'two', 1, 2]
+                }
+            });
+            await expect( request(app).post('/success/embedded').send({
+                    blart: {name: 'Beautiful Link', payload: {test: {poop: 'Mickey', blarp: ['no', 'yes']}} }, one: {name: 'comments', payload: {body: ['Blah blah blah', 'bloom bloom']}}
+                })).resolves
+            .toHaveProperty('body', { 
+                success: expect.any(String),
+                _embedded: {
+                    'Beautiful Link': {test: {poop: 'Mickey', blarp: ['no', 'yes']}},
+                    comments: {body: ['Blah blah blah', 'bloom bloom']}
+                }
+            });
+        });
 
         test('Using res.links to make multiple links.', async function() {
 			let foo = await request(app).post("/success/links").send({fee: "fee", fi: "fi!", foh: 'foh!', fum: 'I smell the blood of an Englishman!'});
-            console.log('LINKS!!!!!!!!!', foo.body._links);
             expect(foo.body).toHaveProperty('_links');
         });
         test('Templated Links in Response', async function() {
