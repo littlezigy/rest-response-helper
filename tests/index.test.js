@@ -15,6 +15,11 @@
         res.link('add_new', '/route/2');
         return res.success(req.body);
     });
+    app.post('/success/links/external', function(req, res) {
+        res.link('self', 'route1.com', 'post', false);
+        res.link('add_new', 'route2.com', null, false);
+        return res.success(req.body);
+    });
     app.post('/success/links/templated', function(req, res) {
         res.link('self', {href: '/route1/:id', id: 126},  'post');
         res.link('add_new', {href: '/stores/:store_id/product/:product_id/', store_id: 12, product_id: 13});
@@ -128,27 +133,48 @@
         });
 
         test('Using res.links to make multiple links.', async function() {
-			let foo = await request(app).post("/success/links").send({fee: "fee", fi: "fi!", foh: 'foh!', fum: 'I smell the blood of an Englishman!'});
-            expect(foo.body).toHaveProperty('_links');
+			let foo = await request(app).post("/success/links/external").send({fee: "fee", fi: "fi!", foh: 'foh!', fum: 'I smell the blood of an Englishman!'});
+            console.log(foo.body._links);
+            expect(foo.body).toHaveProperty('_links', {
+                self: expect.objectContaining({ href: 'route1.com'}),
+                add_new: expect.objectContaining({ href: 'route2.com'})
+            });
         });
+
+        test('Using res.links to make multiple links.', async function() {
+			let foo = await request(app).post("/success/links").send({fee: "fee", fi: "fi!", foh: 'foh!', fum: 'I smell the blood of an Englishman!'});
+            console.log(foo.body._links);
+            expect(foo.body).toHaveProperty('_links', {
+                self: expect.objectContaining({ href: expect.stringMatching(/^http:\/\/localhost:3000/)}),
+                add_new: expect.objectContaining({ href: expect.stringMatching(/^http:\/\/localhost:3000/)})
+            });
+        });
+
         test('Templated Links in Response', async function() {
 			let foo = await request(app).post("/success/links/templated").send({fee: "fee", fi: "fi!", foh: 'foh!', fum: 'I smell the blood of an Englishman!'});
-            expect(foo.body).toHaveProperty('_links');
-            expect(foo.body._links).toHaveProperty('self', expect.objectContaining({href: 'http://localhost:3000/route1/126'}));
-            expect(foo.body._links).toHaveProperty('add_new', expect.objectContaining({href:'http://localhost:3000/stores/12/product/13/'}));
+            expect(foo.body).toHaveProperty('_links', expect.objectContaining({
+                self: expect.objectContaining({href: 'http://localhost:3000/route1/126'}),
+                add_new: expect.objectContaining({href:'http://localhost:3000/stores/12/product/13/'})
+            }))
         });
         
         test('Inner linking with Object', async function() {
             let foo = await request(app).post('/success/links/inner').send({fee:  {bwong: 'fee'}, fi: {bwong: 'fi!'}, foh: {bwong: 'foh!'} });
-            expect(foo.body.data.fee).toHaveProperty('_links');
-            expect(foo.body.data.fee._links.previous).toHaveProperty('href');
-            expect(foo.body.data.fee._links).toHaveProperty('self');
-            expect(foo.body.data.fee._links.self).toHaveProperty('href', 'http://localhost:3000/example/self');
-
-            expect(foo.body.data.fi).toHaveProperty('_links');
-            expect(foo.body.data.fi._links).toHaveProperty('self');
-
+            expect(foo.body).toHaveProperty('data', expect.objectContaining({
+                fee: expect.objectContaining({
+                    _links: expect.objectContaining({
+                        previous: { href: expect.stringMatching(/http:\/\/localhost:3000/) },
+                        self: {href: 'http://localhost:3000/example/self'}
+                    }),
+                }),
+                fi: expect.objectContaining({
+                    _links: expect.objectContaining({
+                        self: { href: expect.anything() }
+                    })
+                })
+            }));
         });
+
         test('Templated Inner linking with Object', async function() {
             let foo = await request(app).post('/success/links/inner/templated/1382').send({fee:  {bwong: 'fee'}, fi: {bwong: 'fi!'}, foh: {bwong: 'foh!'} });
             expect(foo.body.data.fee).toHaveProperty('_links');

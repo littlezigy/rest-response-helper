@@ -55,15 +55,17 @@ templatedLink = function(linkObj) {
 functions = (req, res, next) => {
         
     //TODO: Add Link title by using chainable object, eg res.link().title();
-    res.link = function(name, link, method = null) {
+    res.link = function(name, link, method = null, internalLink = true) {
         let href;
         if(typeof link !== 'string' && typeof link === 'object' && link !== null) {
             href = templatedLink(link);
         }
         else href = link;
 
+        if(internalLink === true) href = baseurl + href;
+
         links[name] = {
-           href: baseurl + href,
+           href,
            ...arguments[2] && {meta: {method: arguments[2].toUpperCase()} },
            ...arguments[3] && {schema: arguments[3]}
         };
