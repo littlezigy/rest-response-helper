@@ -13,7 +13,7 @@
     app.post('/success/links', function(req, res) {
         if(req.body.schema) {
             res.link('self', '/route1', 'post');
-            res.schema(req.body.schema);
+            res.prev.schema(req.body.schema);
         } else res.link('self', '/route1', 'post');
         res.link('add_new', '/route/2');
         return res.success(req.body);
@@ -148,8 +148,8 @@
 			let foo = await request(app).post("/success/links").send({fee: "fee", fi: "fi!", foh: 'foh!', fum: 'I smell the blood of an Englishman!'});
             console.log(foo.body._links);
             expect(foo.body).toHaveProperty('_links', {
-                self: expect.objectContaining({ href: expect.stringMatching(/^http:\/\/localhost:3000/)}),
-                add_new: expect.objectContaining({ href: expect.stringMatching(/^http:\/\/localhost:3000/)})
+                self: { href: expect.stringMatching(/^http:\/\/localhost:3000/) , meta: { method: 'POST'} },
+                add_new: { href: 'http://localhost:3000/route/2' }
             });
         });
 

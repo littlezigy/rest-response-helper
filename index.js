@@ -108,11 +108,12 @@ functions = (req, res, next) => {
         
 
     res.schema = function(data) {
-        console.log('SCHEMA');
-        console.log("Recent link", recentLink);
-        console.log('this l recent lin', this.recentLink);
-        if(recentLink) recentLink.schema = data;
-        else schema = data;
+        schema = data;
+    }
+    res.prev = {
+        schema: function(schema) {
+            recentLink.schema = schema;
+        }
     }
 
     /**
