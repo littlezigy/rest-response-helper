@@ -73,7 +73,6 @@ functions = (req, res, next) => {
            ...arguments[3] && {schema: arguments[3]}
         };
         recentLink = links[name];
-        console.log('JUIST SENT LINK', this.recentLink);
         return this;
     }
     res.innerLink = function(xxx, name, link, method = null) {
