@@ -2,10 +2,11 @@ let links = {};
 let innerLinks = {};
 let baseurl = '';
 let schema = null;
+let recentLink = null;
 
 let embedded = {};
 
-config = function(configObj) {
+const config = function(configObj) {
     if(typeof configObj === 'object') {
         baseurl = (configObj.baseurl) ? configObj.baseurl : (configObj.URL) ? configObj.URL : (configObj.baseURL) ? configObj.baseURL : '';
     } else if(typeof configObj === 'string') {
@@ -13,7 +14,7 @@ config = function(configObj) {
     }
     console.info('All links will now be prefixed with', baseurl);
 }
-hrefLink = function(link, element = null) {
+const hrefLink = function(link, element = null) {
     //link = {href, ...}
     if(typeof linkObj !== 'string') link = JSON.parse(JSON.stringify(link)); //For immutable Object
 
@@ -38,7 +39,7 @@ hrefLink = function(link, element = null) {
     } else return baseurl + link;
 }
 
-templatedLink = function(linkObj) {
+const templatedLink = function(linkObj) {
     let templateVars = linkObj.href.match(/(?<=\/:)[^\/]*/g);
     let newLink = linkObj.href
     //For each object in link, except href
@@ -53,7 +54,9 @@ templatedLink = function(linkObj) {
 }
 
 functions = (req, res, next) => {
+    "use strict";
         
+    res._links = links,
     //TODO: Add Link title by using chainable object, eg res.link().title();
     res.link = function(name, link, method = null, internalLink = true) {
         let href;
@@ -64,11 +67,14 @@ functions = (req, res, next) => {
 
         if(internalLink === true) href = baseurl + href;
 
-        links[name] = {
+        res.recentLink = links[name] = {
            href,
            ...arguments[2] && {meta: {method: arguments[2].toUpperCase()} },
            ...arguments[3] && {schema: arguments[3]}
         };
+        recentLink = links[name];
+        console.log('JUIST SENT LINK', this.recentLink);
+        return this;
     }
     res.innerLink = function(xxx, name, link, method = null) {
         let href;
@@ -102,7 +108,11 @@ functions = (req, res, next) => {
         
 
     res.schema = function(data) {
-        schema = data;
+        console.log('SCHEMA');
+        console.log("Recent link", recentLink);
+        console.log('this l recent lin', this.recentLink);
+        if(recentLink) recentLink.schema = data;
+        else schema = data;
     }
 
     /**
@@ -132,6 +142,7 @@ functions = (req, res, next) => {
         res.send({error: {...code &&  {code}, ...title && {title}, ...detail && {detail}, ..._links && {_links} }});
         links = {};
         schema = null;
+        recentLink = null;
     }
 
     /**
@@ -148,6 +159,7 @@ functions = (req, res, next) => {
         embedded = {};
         links = {};
         schema = null;
+        recentLink = null;
     }
 
     res.failure = () => {
@@ -158,6 +170,7 @@ functions = (req, res, next) => {
         res.status(statusCode).send({fail: message, ...data && {data}});
         links = {};
         schema = null;
+        recentLink = null;
     }
     next();
 }

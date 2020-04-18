@@ -11,7 +11,10 @@
 	app.use(responsehelper.functions);
 
     app.post('/success/links', function(req, res) {
-        res.link('self', '/route1', 'post');
+        if(req.body.schema) {
+            res.link('self', '/route1', 'post');
+            res.schema(req.body.schema);
+        } else res.link('self', '/route1', 'post');
         res.link('add_new', '/route/2');
         return res.success(req.body);
     });
@@ -146,6 +149,15 @@
             console.log(foo.body._links);
             expect(foo.body).toHaveProperty('_links', {
                 self: expect.objectContaining({ href: expect.stringMatching(/^http:\/\/localhost:3000/)}),
+                add_new: expect.objectContaining({ href: expect.stringMatching(/^http:\/\/localhost:3000/)})
+            });
+        });
+
+        test('Adding schema to link.', async function() {
+			let foo = await request(app).post("/success/links").send({fee: "fee", fum: 'I smell the blood of an Englishman!', schema: {properties: { blah: 'bloom'} } });
+            console.log(foo.body._links);
+            expect(foo.body).toHaveProperty('_links', {
+                self: expect.objectContaining({ schema: { properties: {blah: 'bloom'} },  href: expect.stringMatching(/^http:\/\/localhost:3000/)}),
                 add_new: expect.objectContaining({ href: expect.stringMatching(/^http:\/\/localhost:3000/)})
             });
         });
