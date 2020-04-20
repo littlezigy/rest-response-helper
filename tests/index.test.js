@@ -74,6 +74,18 @@
 		return res.success(req.body);
 	});
 
+	app.post('/success/named/resources', function(req, res) {
+        console.log('NAMED RESOURCES', req.body.resources);
+
+        for(let resource in req.body.resources) {
+            console.log('boom', resource);
+            res.add(resource, req.body.resources[resource]);
+        }
+        console.log('BOOM');
+        if(req.body.schema) res.schema(req.body.schema);
+		return res.success();
+	});
+
     app.post('/error/one/parameter', function(req, res) {
         return res.gerror(req.body.error);
 	});
@@ -104,6 +116,32 @@
                 data: {fee: 'fee', fi: 'fi!', foh: 'foh!', fum: 'I smell the blood of an Englishman!'}
             });
 		});
+
+        test('With custom named resources', async function() {
+            expect(
+                request(app).post('/success/named/resources').send({
+                    resources: {balloons: '99 red baloons', countries: ['Niamey', 'Hong Kong', 'Nigeria'], words: {pickney: 'overused', pencil: 'not overused'} }
+                })
+            ).resolves.toHaveProperty('body', {
+                success: expect.any(String),
+                balloons: '99 red baloons',
+                countries: ['Niamey', 'Hong Kong', 'Nigeria'],
+                words: {pickney: 'overused', pencil: 'not overused'} 
+            });
+        });
+
+        test('With custom named resources 2', async function() {
+            expect(
+                request(app).post('/success/named/resources').send({
+                    resources: {luftBalloons: '98 red baloons', randomCountries: ['London', 'Nigeria'], words: {  pencil: 'Sharpened'} }
+                })
+            ).resolves.toHaveProperty('body', {
+                success: expect.any(String),
+                luftBalloons: '98 red baloons',
+                randomCountries: ['London', 'Nigeria'],
+                words: {pencil: 'Sharpened'} 
+            });
+        });
 
 		test('res.success(string)', async function() {
 			let payload = 'sample string';
@@ -137,7 +175,6 @@
 
         test('Using res.links to make multiple links.', async function() {
 			let foo = await request(app).post("/success/links/external").send({fee: "fee", fi: "fi!", foh: 'foh!', fum: 'I smell the blood of an Englishman!'});
-            console.log(foo.body._links);
             expect(foo.body).toHaveProperty('_links', {
                 self: expect.objectContaining({ href: 'route1.com'}),
                 add_new: expect.objectContaining({ href: 'route2.com'})
@@ -146,7 +183,6 @@
 
         test('Using res.links to make multiple links.', async function() {
 			let foo = await request(app).post("/success/links").send({fee: "fee", fi: "fi!", foh: 'foh!', fum: 'I smell the blood of an Englishman!'});
-            console.log(foo.body._links);
             expect(foo.body).toHaveProperty('_links', {
                 self: { href: expect.stringMatching(/^http:\/\/localhost:3000/) , meta: { method: 'POST'} },
                 add_new: { href: 'http://localhost:3000/route/2' }
@@ -155,7 +191,6 @@
 
         test('Adding schema to link.', async function() {
 			let foo = await request(app).post("/success/links").send({fee: "fee", fum: 'I smell the blood of an Englishman!', schema: {properties: { blah: 'bloom'} } });
-            console.log(foo.body._links);
             expect(foo.body).toHaveProperty('_links', {
                 self: expect.objectContaining({ schema: { properties: {blah: 'bloom'} },  href: expect.stringMatching(/^http:\/\/localhost:3000/)}),
                 add_new: expect.objectContaining({ href: expect.stringMatching(/^http:\/\/localhost:3000/)})

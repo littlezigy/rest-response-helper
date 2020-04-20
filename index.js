@@ -3,6 +3,7 @@ let innerLinks = {};
 let baseurl = '';
 let schema = null;
 let recentLink = null;
+let resources = {};
 
 let embedded = {};
 
@@ -143,6 +144,11 @@ functions = (req, res, next) => {
         links = {};
         schema = null;
         recentLink = null;
+        resources = {};
+    }
+
+    res.add = function(name, payload) {
+        resources[name] = payload;
     }
 
     /**
@@ -155,11 +161,13 @@ functions = (req, res, next) => {
                    (typeof arguments[1] === 'object' || typeof arguments[0] === 'array') ? arguments[1] : null;
         let _links = (Object.keys(links).length > 0) ? links : null;
         let _embedded = (Object.keys(embedded).length > 0) ? embedded : null;
-		res.send({success: message, ...schema && {schema}, ...data && {data}, ..._embedded && {_embedded},  ..._links && {_links}});
+        let resources_ = (Object.keys(resources).length > 0) ? resources : null;
+		res.send({success: message, ...resources_ && {...resources}, ...schema && {schema}, ...data && {data}, ..._embedded && {_embedded},  ..._links && {_links}});
         embedded = {};
         links = {};
         schema = null;
         recentLink = null;
+        resources = {};
     }
 
     res.failure = () => {
