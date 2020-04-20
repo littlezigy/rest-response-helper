@@ -4,6 +4,7 @@ let baseurl = '';
 let schema = null;
 let recentLink = null;
 let resources = {};
+let todebug = false;
 
 let embedded = {};
 
@@ -13,7 +14,7 @@ const config = function(configObj) {
     } else if(typeof configObj === 'string') {
         baseurl = configObj;
     }
-    console.info('All links will now be prefixed with', baseurl);
+    if(todebug === true) console.info('All links will now be prefixed with', baseurl);
 }
 const hrefLink = function(link, element = null) {
     //link = {href, ...}
@@ -57,6 +58,10 @@ const templatedLink = function(linkObj) {
 functions = (req, res, next) => {
     "use strict";
         
+    res.debug = function(setDebug = true) {
+        if(setDebug !== true && setDebug !== false) throw "Invalid Debug option. Please set as true or false";
+        todebug = setDebug;
+    }
     res._links = links,
     //TODO: Add Link title by using chainable object, eg res.link().title();
     res.link = function(name, link, method = null, internalLink = true) {
@@ -170,15 +175,21 @@ functions = (req, res, next) => {
         resources = {};
     }
 
-    res.failure = () => {
-        let message = arguments[0] || "Operation Successful";
-        let statusCode = arguments[1] || 400;
-        let data = arguments[1] || null;
-
-        res.status(statusCode).send({fail: message, ...data && {data}});
+    res.fail = function() {
+        console.log('Failure response');
+        let message = (arguments[0]!== null && typeof arguments[0] === 'string') ? arguments[0] : "Operation Failed";
+        
+        let data = (typeof arguments[0] === 'object' || typeof arguments[0] === 'array') ? arguments[0] : 
+                   (typeof arguments[1] === 'object' || typeof arguments[0] === 'array') ? arguments[1] : null;
+        let _links = (Object.keys(links).length > 0) ? links : null;
+        let _embedded = (Object.keys(embedded).length > 0) ? embedded : null;
+        let resources_ = (Object.keys(resources).length > 0) ? resources : null;
+		res.send({failure: message, ...resources_ && {...resources}, ...schema && {schema}, ...data && {data}, ..._embedded && {_embedded},  ..._links && {_links}});
+        embedded = {};
         links = {};
         schema = null;
         recentLink = null;
+        resources = {};
     }
     next();
 }

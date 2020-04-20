@@ -10,13 +10,17 @@
 	app.use(bodyparser.json());
 	app.use(responsehelper.functions);
 
-    app.post('/success/links', function(req, res) {
+    app.post('/:operationType/links', function(req, res) {
+        console.log('GETTING ALL PARAMS', req.params);
+        console.log('GETTING OPERATION TYPE', req.params.operationType);
         if(req.body.schema) {
             res.link('self', '/route1', 'post');
             res.prev.schema(req.body.schema);
         } else res.link('self', '/route1', 'post');
         res.link('add_new', '/route/2');
-        return res.success(req.body);
+        if(req.params.operationType === 'success') return res.success(req.body);
+        else if(req.params.operationType.indexOf('fail') >= 0) return res.fail(req.body);
+        else throw "Set the route param properly";
     });
     app.post('/success/links/external', function(req, res) {
         res.link('self', 'route1.com', 'post', false);
@@ -58,7 +62,7 @@
         }
         if(req.params.responseType == 'success') res.success();
         else if(req.params.responseType == 'error') res.gerror();
-        else res.failure();
+        else res.fail();
     });
 
     responsehelper.config('http://localhost:3000');
@@ -75,13 +79,10 @@
 	});
 
 	app.post('/success/named/resources', function(req, res) {
-        console.log('NAMED RESOURCES', req.body.resources);
 
         for(let resource in req.body.resources) {
-            console.log('boom', resource);
             res.add(resource, req.body.resources[resource]);
         }
-        console.log('BOOM');
         if(req.body.schema) res.schema(req.body.schema);
 		return res.success();
 	});
@@ -181,6 +182,7 @@
             });
         });
 
+
         test('Using res.links to make multiple links.', async function() {
 			let foo = await request(app).post("/success/links").send({fee: "fee", fi: "fi!", foh: 'foh!', fum: 'I smell the blood of an Englishman!'});
             expect(foo.body).toHaveProperty('_links', {
@@ -188,6 +190,18 @@
                 add_new: { href: 'http://localhost:3000/route/2' }
             });
         });
+
+        test('Fail Response', async function() {
+            console.log('FAIL RESPONSE');
+			let foo = await request(app).post("/failure/links").send({fee: "fee", fi: "fi!", foh: 'foh!', fum: 'I smell the blood of an Englishman!'});
+            expect(foo.body).toEqual( expect.objectContaining({
+                failure: 'Operation Failed',
+                '_links': {
+                    self: { href: expect.stringMatching(/^http:\/\/localhost:3000/) , meta: { method: 'POST'} },
+                    add_new: { href: 'http://localhost:3000/route/2' }
+                }
+            }));
+        }, 8000);
 
         test('Adding schema to link.', async function() {
 			let foo = await request(app).post("/success/links").send({fee: "fee", fum: 'I smell the blood of an Englishman!', schema: {properties: { blah: 'bloom'} } });
