@@ -42,6 +42,12 @@
         }
         return res.success(req.body);
     });
+    app.post('/success/links/inner/titletag', function(req, res) {
+        for(let post in req.body) {
+            res.innerLink(req.body[post], {name: 'self', title: 'Fancy Button'}, '/example/self');
+        }
+        return res.success(req.body);
+    });
     app.post('/success/links/inner/obj', function(req, res) {
         for(let post in req.body) {
             res.innerLink(req.body[post], 'self', {href: '/example/:id', id: {property: 'foo'} });
@@ -232,6 +238,17 @@
                     _links: expect.objectContaining({
                         self: { href: expect.anything() }
                     })
+                })
+            }));
+        });
+        test('Title tag and Inner linking with Object', async function() {
+            console.log('TITLE TAG LINK');
+            let foo = await request(app).post('/success/links/inner/titletag').send({fee:  {bwong: 'fee'} });
+            expect(foo.body).toHaveProperty('data', expect.objectContaining({
+                fee: expect.objectContaining({
+                    _links: expect.objectContaining({
+                        self: {title: 'Fancy Button', href: 'http://localhost:3000/example/self'}
+                    }),
                 })
             }));
         });

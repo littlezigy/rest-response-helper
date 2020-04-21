@@ -64,8 +64,15 @@ functions = (req, res, next) => {
     }
     res._links = links,
     //TODO: Add Link title by using chainable object, eg res.link().title();
-    res.link = function(name, link, method = null, internalLink = true) {
+    res.link = function(nameObj, link, method = null, internalLink = true) {
         let href;
+        let name, title;
+        if(typeof nameObj === 'object' && nameObj !== null) {
+            name = nameObj.name
+            title = nameObj.title;
+        }
+        else name = nameObj
+
         if(typeof link !== 'string' && typeof link === 'object' && link !== null) {
             href = templatedLink(link);
         }
@@ -75,16 +82,25 @@ functions = (req, res, next) => {
 
         res.recentLink = links[name] = {
            href,
+           ...title && {title}, 
            ...arguments[2] && {meta: {method: arguments[2].toUpperCase()} },
            ...arguments[3] && {schema: arguments[3]}
         };
         recentLink = links[name];
         return this;
     }
-    res.innerLink = function(xxx, name, link, method = null) {
+    res.innerLink = function(xxx, nameObj, link, method = null) {
         let href;
 
         let meta = (method!== null) ? {method} : null;
+
+        let name, title;
+        if(typeof nameObj === 'object' && nameObj !== null) {
+            name = nameObj.name
+            title = nameObj.title;
+        }
+        else name = nameObj
+
 
         if(Array.isArray(xxx)) {
             xxx.forEach(element => {
@@ -93,14 +109,14 @@ functions = (req, res, next) => {
                     element._links = {};
                 }
 
-                element._links[name] = { href, ...meta && {meta}, ...schema && {schema} };
+                element._links[name] = { ...title && {title}, href, ...meta && {meta}, ...schema && {schema} };
             });
         } else if(typeof xxx === 'object' && xxx !== null) {
                 href = hrefLink(link, xxx)
                 if(!xxx._links) {
                     xxx._links = {};
                 }
-            xxx._links[name] = { href, ...meta && {meta}, ...schema && {schema} };
+            xxx._links[name] = { href, ...title && {title}, ...meta && {meta}, ...schema && {schema} };
         }
     },
 
