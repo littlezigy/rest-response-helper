@@ -37,8 +37,10 @@ const hrefLink = function(link, element = null) {
                 //console.log(link.href);
             }
         });
-        return baseurl + link.href;
-    } else return baseurl + link;
+     //   return baseurl + link.href;
+        return link.href;
+    //} else return baseurl + link;
+    } else return link;
 }
 
 const templatedLink = function(linkObj) {
@@ -89,7 +91,7 @@ functions = (req, res, next) => {
         recentLink = links[name];
         return this;
     }
-    res.innerLink = function(xxx, nameObj, link, method = null) {
+    res.innerLink = function(xxx, nameObj, link, method = null, internalLink = true) {
         let href;
 
         let meta = (method!== null) ? {method} : null;
@@ -104,7 +106,9 @@ functions = (req, res, next) => {
 
         if(Array.isArray(xxx)) {
             xxx.forEach(element => {
-                href = hrefLink(link, element)
+                if(internalLink === true)    href = baseurl + hrefLink(link, element)
+                else    href = hrefLink(link, element)
+
                 if(!element._links) {
                     element._links = {};
                 }
@@ -112,7 +116,9 @@ functions = (req, res, next) => {
                 element._links[name] = { ...title && {title}, href, ...meta && {meta}, ...schema && {schema} };
             });
         } else if(typeof xxx === 'object' && xxx !== null) {
-                href = hrefLink(link, xxx)
+                if(internalLink === true)    href = baseurl + hrefLink(link, xxx)
+                else    href = hrefLink(link, xxx)
+
                 if(!xxx._links) {
                     xxx._links = {};
                 }
