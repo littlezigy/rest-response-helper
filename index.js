@@ -147,12 +147,13 @@ functions = (req, res, next) => {
      * @params {string} gerror - Error message.
      */
     res.gerror = function() {
-        let title, code, detail;
+        let title, code, detail, message;
         if(typeof arguments[0] === 'object') {
             let errobj = arguments[0];
             title = errobj.title;
             code = errobj.code;
             detail = errobj.detail;
+            message = errobj.message;
         } else if(typeof arguments[0] === 'string') {
             if( /[A-Z]/g.test(arguments[0]) ) {
                 title = arguments[0];
@@ -167,7 +168,7 @@ functions = (req, res, next) => {
 
         if(res.statusCode == false || res.statusCode < 400) res.status(400);
 
-        res.send({error: {...code &&  {code}, ...title && {title}, ...detail && {detail}, ..._links && {_links} }});
+        res.send({error: {...code &&  {code}, ...title && {title}, ...detail && {detail}, ...message && {message}, ..._links && {_links} }});
         links = {};
         schema = null;
         recentLink = null;
