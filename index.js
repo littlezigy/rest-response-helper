@@ -82,10 +82,17 @@ functions = (req, res, next) => {
 
         if(internalLink === true) href = baseurl + href;
 
+        let meta;
+        if(typeof method === 'object' && method !== null)
+            meta = method;
+        else if(typeof method === 'string')
+            meta = (method!== null) ? {method: method.toUpperCase()} : null;
+        else meta = null;
+
         res.recentLink = links[name] = {
            href,
            ...title && {title}, 
-           ...arguments[2] && {meta: {method: arguments[2].toUpperCase()} },
+           ...meta && { meta },
            ...arguments[3] && {schema: arguments[3]}
         };
         recentLink = links[name];
@@ -94,7 +101,12 @@ functions = (req, res, next) => {
     res.innerLink = function(xxx, nameObj, link, method = null, internalLink = true) {
         let href;
 
-        let meta = (method!== null) ? {method} : null;
+        let meta;
+        if(typeof method === 'object' && method !== null)
+            meta = method;
+        else if(typeof method === 'string')
+            meta = (method!== null) ? {method} : null;
+        else meta = null;
 
         let name, title;
         if(typeof nameObj === 'object' && nameObj !== null) {
