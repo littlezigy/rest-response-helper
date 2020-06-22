@@ -23,7 +23,7 @@ const hrefLink = function(link, element = null) {
     //If link is an object, then it has a named object  = 'key' containing property 'property'. 'property' exists in the object(s) in element.
     //Get value of 'property' from object(s) in element and replace string `:key` with the value in Object
     if(typeof link === 'object' && link !== null) {
-        let templateVars = link.href.match(/(?<=\/:)[^\/]*/g);
+        let templateVars = link.href.match(/(?<=\/:)[^\/?]*/g);
 
         Object.keys(link).forEach(template => {
             if(templateVars.includes(template)) {
