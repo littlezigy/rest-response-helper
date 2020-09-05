@@ -201,14 +201,17 @@ functions = (req, res, next) => {
                    (typeof arguments[1] === 'object' || typeof arguments[0] === 'array') ? arguments[1] : null;
         //let _links = (Object.keys(links).length > 0) ? links : null;
         let _links = links;
-        let _embedded = (Object.keys(embedded).length > 0) ? embedded : null;
-        let resources_ = (Object.keys(resources).length > 0) ? resources : null;
-		res.send({success: message, ...resources_ && {...resources}, ...schema && {schema}, ...data && {data}, ..._embedded && {_embedded},  _links });
+        let _embedded = (Object.keys(embedded).length > 0) ? Object.assign(embedded) : null;
+        let resources_ = (Object.keys(resources).length > 0) ? Object.assign(resources) : null;
+        let tempSchema = (schema) ? Object.assign(schema) : null;
+
         embedded = {};
         links = {};
         schema = null;
         recentLink = null;
         resources = {};
+
+		return res.send({success: message, ...resources_ && {...resources}, ...tempSchema && {schema: tempSchema}, ...data && {data}, ..._embedded && {_embedded},  _links });
     }
 
     res.fail = function() {

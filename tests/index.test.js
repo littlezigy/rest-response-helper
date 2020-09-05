@@ -125,11 +125,10 @@
 		});
 
         test('With custom named resources', async function() {
-            expect(
-                request(app).post('/success/named/resources').send({
+            let foo = await request(app).post('/success/named/resources').send({
                     resources: {balloons: '99 red baloons', countries: ['Niamey', 'Hong Kong', 'Nigeria'], words: {pickney: 'overused', pencil: 'not overused'} }
                 })
-            ).resolves.toHaveProperty('body', {
+            return expect(foo).toHaveProperty('body', {
                 success: expect.any(String),
                 balloons: '99 red baloons',
                 countries: ['Niamey', 'Hong Kong', 'Nigeria'],
@@ -138,11 +137,10 @@
         });
 
         test('With custom named resources 2', async function() {
-            expect(
-                request(app).post('/success/named/resources').send({
+                let foo = await request(app).post('/success/named/resources').send({
                     resources: {luftBalloons: '98 red baloons', randomCountries: ['London', 'Nigeria'], words: {  pencil: 'Sharpened'} }
                 })
-            ).resolves.toHaveProperty('body', {
+            return expect(foo).toHaveProperty('body', {
                 success: expect.any(String),
                 luftBalloons: '98 red baloons',
                 randomCountries: ['London', 'Nigeria'],
@@ -358,6 +356,14 @@
 
 		test('Schema', async function() {
 			let payload = {schema: {properties: {name: 'Poo'} } };
+			let foo = await request(app)
+					.post('/success').send(payload);
+
+            expect(foo.body).toHaveProperty('schema', payload.schema);
+		});
+
+		test('Nested Schema', async function() {
+			let payload = {schema: {properties: {name: 'Poo', title: { first: 'the best', second: 'farlong' }} } };
 			let foo = await request(app)
 					.post('/success').send(payload);
 
